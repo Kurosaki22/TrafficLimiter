@@ -12,6 +12,10 @@ public partial class MainWindow : Window
 
     public bool StartHidden => _vm.StartMinimized;
 
+    /// <summary>Version aus dem csproj, ohne das Git-Hash-Suffix (+abc123).</summary>
+    public static string AppVersion { get; } = "v" + (System.Reflection.CustomAttributeExtensions.GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>(
+        System.Reflection.Assembly.GetExecutingAssembly())?.InformationalVersion ?? "?").Split('+')[0];
+
     public MainWindow()
     {
         InitializeComponent();

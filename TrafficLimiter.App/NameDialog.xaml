@@ -5,7 +5,7 @@
         Title="{local:T profile_name_title}" Width="400" SizeToContent="Height" ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
         Background="{DynamicResource WindowBg}" Foreground="{DynamicResource TextPrimary}"
-        FontFamily="Segoe UI Variable Text">
+        FontFamily="{StaticResource UiFont}">
     <StackPanel Margin="22">
         <TextBlock Text="{local:T profile_name_prompt}" Style="{StaticResource Muted}" Margin="0,0,0,8" />
         <TextBox x:Name="NameBox" Style="{StaticResource Input}" MaxLength="40" Padding="10,8" />

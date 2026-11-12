@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/app-rules.png" alt="TrafficLimiter main window: process list on the left, rules and live chart of the selected app on the right" width="100%">
+  <img src="docs/screenshots/app-rules.png" alt="TrafficLimiter main window: live download and upload with a 60-second chart on top, the process list below on the left, rules and statistics of the selected app on the right" width="100%">
 </p>
 
 ## What is it?
@@ -32,7 +32,10 @@ Windows shows you *that* your connection is busy, but not *who* is using it, and
 It is a single `.exe`, needs no installer, and everything you change takes effect immediately.
 
 > The screenshot above is real: a `curl` download is limited to **2048 KB/s** and the chart shows the flat 2 MB/s
-> line, Edge has a 512 KB/s upload cap, and `ssh` is blocked (red row).
+> line, Edge has a 512 KB/s upload cap (violet bar), and `ssh` is blocked (red row).
+
+Colour always means the same thing: **blue** is download, **amber** is upload, **violet** is a limit, **red** is a block.
+Everything else is neutral graphite (dark) or paper (light).
 
 ## Features
 
@@ -42,12 +45,12 @@ It is a single `.exe`, needs no installer, and everything you change takes effec
 | **Speed limits** | Type a limit in KB/s right in the list (press Enter). Separate limits for download and upload, plus a total limit for the whole computer. |
 | **Per-app firewall** | Block an application from the network; blocked rows are tinted red. |
 | **Priorities** | Low / Normal / High / Critical. With a total limit set, higher priorities get bandwidth first. |
-| **Smooth live chart** | 60-second history of the whole computer or the selected app. |
+| **Live meter** | The current download and upload in large numerals, next to a smooth 60-second chart of the whole computer or the selected app. Hide the chart with one click. |
 | **Profiles** | Save your current rules as a profile (for example *Gaming*, *Work*) and switch with two clicks, also from the tray menu. |
 | **Tray quick actions** | Pause all limits, start/stop traffic control, switch profile, open the window. |
 | **Start with Windows** | Optional. Uses an elevated scheduled task, so there is no UAC prompt at every login. Can start minimised to the tray. |
 | **English and German** | Switch the language live in the settings; the default follows Windows. |
-| **Dark and light theme** | Follows the Windows setting. |
+| **Dark and light theme** | Follows the Windows setting. Keyboard-friendly: every control has a visible focus ring. |
 | **Search and filter** | Search by name, show only apps that are active right now, collapse the process list. |
 
 ## Quick tour
@@ -55,14 +58,14 @@ It is a single `.exe`, needs no installer, and everything you change takes effec
 1. Start `TrafficLimiter.exe` and click **Start traffic control**. The app offers to restart with administrator
    rights, because the packet filter needs them. From then on traffic control starts automatically.
 2. The list shows your computer on top and all programs with network activity below it.
-3. **Limit a program:** click into its *↓ LIMIT* or *↑ LIMIT* cell, type a value in KB/s, press Enter. Empty or `∞` means unlimited.
+3. **Limit a program:** click into its *Down limit* or *Up limit* cell, type a value in KB/s, press Enter. Empty or `∞` means unlimited.
 4. **Block a program:** select it, then use *Block* in the panel on the right. A red bar appears next to the row.
 5. **Limit everything:** select the computer row on top and enter a total limit.
 6. **Save a setup:** *Profile ▾ → Save current settings as profile …*
 
 <table>
   <tr>
-    <td width="50%" align="center"><img src="docs/screenshots/overview.png" alt="Overview with the computer row selected: total rates, total limit and whole-computer chart"><br><sub>Overview: the computer row shows totals and holds the total limit</sub></td>
+    <td width="50%" align="center"><img src="docs/screenshots/overview.png" alt="Overview with the computer row selected: live totals, whole-computer chart and the total limit panel"><br><sub>Overview: the computer row shows totals and holds the total limit</sub></td>
     <td width="50%" align="center"><img src="docs/screenshots/profiles.png" alt="Profile menu with the profiles Gaming and Work"><br><sub>Profiles: switch whole rule sets at once</sub></td>
   </tr>
 </table>

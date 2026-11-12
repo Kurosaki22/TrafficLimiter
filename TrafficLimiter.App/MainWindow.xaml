@@ -4,7 +4,7 @@
         xmlns:local="clr-namespace:TrafficLimiter.App"
         Title="TrafficLimiter" Height="880" Width="1320" MinWidth="1260" MinHeight="640"
         Background="{DynamicResource WindowBg}" Foreground="{DynamicResource TextPrimary}"
-        FontFamily="Segoe UI Variable Text">
+        FontFamily="{StaticResource UiFont}">
     <Window.Resources>
         <local:BytesConverter x:Key="Bytes" />
         <local:LimitConverter x:Key="Limit" />
@@ -12,9 +12,10 @@
         <BooleanToVisibilityConverter x:Key="BoolVis" />
         <Style x:Key="Section" TargetType="TextBlock" BasedOn="{StaticResource Muted}">
             <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Margin" Value="0,14,0,6" />
+            <Setter Property="Margin" Value="0,20,0,8" />
         </Style>
         <Style x:Key="InfoKey" TargetType="TextBlock" BasedOn="{StaticResource Muted}">
+            <Setter Property="FontSize" Value="13" />
             <Setter Property="Margin" Value="0,4" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
@@ -22,83 +23,81 @@
             <Setter Property="Margin" Value="0,6" />
             <Setter Property="HorizontalAlignment" Value="Right" />
             <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
         </Style>
         <Style x:Key="LimitBox" TargetType="TextBox" BasedOn="{StaticResource Input}">
             <Setter Property="Width" Value="90" />
             <Setter Property="TextAlignment" Value="Center" />
             <Setter Property="Padding" Value="8,4" />
             <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource LimitBrush}" />
             <Setter Property="Margin" Value="0,2" />
+        </Style>
+        <!-- Symbole: Kontur in der Vordergrundfarbe des Buttons -->
+        <Style x:Key="Icon" TargetType="Path">
+            <Setter Property="Width" Value="16" />
+            <Setter Property="Height" Value="16" />
+            <Setter Property="StrokeThickness" Value="1.6" />
+            <Setter Property="StrokeLineJoin" Value="Round" />
+            <Setter Property="StrokeStartLineCap" Value="Round" />
+            <Setter Property="StrokeEndLineCap" Value="Round" />
+            <Setter Property="Stroke" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ButtonBase}}" />
         </Style>
     </Window.Resources>
     <Window.InputBindings>
         <KeyBinding Key="Escape" Command="{Binding ShowTotalCommand}" />
     </Window.InputBindings>
 
-    <Grid Margin="22">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="16" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Kopf: Titel, Live-Werte, Steuerung -->
-        <Grid>
+        <!-- Leiste: Name, Zustand, Steuerung -->
+        <Grid Margin="24,14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <StackPanel VerticalAlignment="Center">
-                <TextBlock Text="TrafficLimiter" FontSize="26" FontWeight="SemiBold" />
-                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                    <Ellipse Width="8" Height="8" VerticalAlignment="Center" Margin="0,0,8,0">
-                        <Ellipse.Style>
-                            <Style TargetType="Ellipse">
-                                <Setter Property="Fill" Value="{DynamicResource TextMuted}" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding EngineOn}" Value="True">
-                                        <Setter Property="Fill" Value="{DynamicResource Ok}" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Ellipse.Style>
-                    </Ellipse>
-                    <TextBlock Text="{Binding Status}" Style="{StaticResource Muted}" />
-                </StackPanel>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="TrafficLimiter" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" />
+                <TextBlock Text="{x:Static local:MainWindow.AppVersion}" Style="{StaticResource Muted}" FontSize="13" Margin="8,3,0,0" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding Status}" Margin="16,2,0,0" VerticalAlignment="Center" FontSize="13">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding EngineOn}" Value="True">
+                                    <Setter Property="Foreground" Value="{DynamicResource Ok}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
             </StackPanel>
 
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,18,0">
-                <Border Style="{StaticResource Card}" Padding="18,12" MinWidth="180" Margin="0,0,12,0">
-                    <StackPanel>
-                        <TextBlock Text="↓  DOWNLOAD" Style="{StaticResource Muted}" />
-                        <TextBlock Text="{Binding DownText}" FontSize="26" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource DownBrush}" />
-                    </StackPanel>
-                </Border>
-                <Border Style="{StaticResource Card}" Padding="18,12" MinWidth="180">
-                    <StackPanel>
-                        <TextBlock Text="↑  UPLOAD" Style="{StaticResource Muted}" />
-                        <TextBlock Text="{Binding UpText}" FontSize="26" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource UpBrush}" />
-                    </StackPanel>
-                </Border>
-            </StackPanel>
-
-            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                <ToggleButton Content="📈" IsChecked="{Binding ShowChart}" Style="{StaticResource ChipToggle}"
-                              ToolTip="{local:T tip_chart}" Padding="14,11" Margin="0,0,8,0" />
-                <Button Content="{Binding ProfileButton}" Style="{StaticResource GhostButton}" Padding="16,11" Margin="0,0,8,0"
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <ToggleButton IsChecked="{Binding ShowChart}" Style="{StaticResource ChipToggle}"
+                              ToolTip="{local:T tip_chart}" Padding="9" Margin="0,0,8,0">
+                    <Path Style="{StaticResource Icon}" Data="M2,2 V14 H14 M5,10.5 L8,7 L10.5,9 L14,4.5" />
+                </ToggleButton>
+                <Button Content="{Binding ProfileButton}" Style="{StaticResource GhostButton}" Margin="0,0,8,0"
                         Click="OpenProfiles" />
-                <Button Content="⚙" Style="{StaticResource GhostButton}" FontSize="16" Padding="14,9" Margin="0,0,8,0"
-                        ToolTip="{local:T set_title}" Click="OpenSettings" />
-                <ToggleButton Content="{local:T btn_pause}" IsChecked="{Binding Paused}" Style="{StaticResource PillToggle}" Margin="0,0,10,0" />
-                <Button Content="{Binding EngineButton}" Command="{Binding ToggleEngineCommand}" MinWidth="190">
+                <Button Style="{StaticResource GhostButton}" Padding="9" Margin="0,0,8,0"
+                        ToolTip="{local:T set_title}" Click="OpenSettings">
+                    <Path Style="{StaticResource Icon}" Data="M2,5 H14 M2,11 H14 M10,2.5 V7.5 M5,8.5 V13.5" />
+                </Button>
+                <ToggleButton Content="{local:T btn_pause}" IsChecked="{Binding Paused}" Style="{StaticResource ChipToggle}" Margin="0,0,8,0" />
+                <Button Content="{Binding EngineButton}" Command="{Binding ToggleEngineCommand}" MinWidth="180">
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding EngineOn}" Value="True">
                                     <Setter Property="Background" Value="{DynamicResource Danger}" />
+                                    <Setter Property="Foreground" Value="{DynamicResource OnDanger}" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
@@ -107,301 +106,297 @@
             </StackPanel>
         </Grid>
 
-        <Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" MinWidth="640" />
-                <ColumnDefinition Width="16" />
-                <ColumnDefinition Width="470" />
-            </Grid.ColumnDefinitions>
+        <!-- Messband: die Live-Werte und die letzten 60 Sekunden -->
+        <Border Grid.Row="1" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource CardBorder}" BorderThickness="0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" MinWidth="260" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Margin="24,14,24,14" VerticalAlignment="Center">
+                    <TextBlock Text="Download" Style="{StaticResource Muted}" FontSize="13" />
+                    <TextBlock Text="{Binding DownText}" Style="{StaticResource BigNum}" Foreground="{DynamicResource DownBrush}" />
+                    <TextBlock Text="Upload" Style="{StaticResource Muted}" FontSize="13" Margin="0,8,0,0" />
+                    <TextBlock Text="{Binding UpText}" Style="{StaticResource BigNum}" Foreground="{DynamicResource UpBrush}" />
+                </StackPanel>
 
-            <!-- Links: Prozessliste -->
-            <Border Style="{StaticResource Card}" Padding="14,14,14,8">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="8" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <DockPanel>
-                        <Grid DockPanel.Dock="Right" Width="210" Height="32">
-                            <TextBox Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource Input}"
-                                     Tag="{local:T search_ph}" FontSize="12.5" Padding="32,0,8,0" />
-                            <Path Data="M10,6 A4,4 0 1 1 2,6 A4,4 0 1 1 10,6 M9,9 L13,13" Stroke="{DynamicResource TextMuted}" StrokeThickness="1.6"
-                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" Width="14" Height="14"
-                                  HorizontalAlignment="Left" VerticalAlignment="Center" Margin="11,0,0,0" IsHitTestVisible="False" />
-                        </Grid>
-                        <ToggleButton Content="{local:T filter_active}" IsChecked="{Binding OnlyActive}" Style="{StaticResource ChipToggle}"
-                                      Padding="12,5" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Center" />
-                    </DockPanel>
-
-                    <DataGrid Grid.Row="2" Style="{StaticResource ModernGrid}" ItemsSource="{Binding View}"
-                              SelectedItem="{Binding Selected}" IsReadOnly="True">
-                        <DataGrid.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Header="{local:T ctx_reset}" Command="{Binding ResetCommand}"
-                                          CommandParameter="{Binding Selected}" />
-                            </ContextMenu>
-                        </DataGrid.ContextMenu>
-                        <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="" Width="*" MinWidth="160" HeaderStyle="{StaticResource LeftHeader}">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <DockPanel LastChildFill="True">
-                                            <DockPanel.Style>
-                                                <Style TargetType="DockPanel">
-                                                    <Setter Property="Margin" Value="24,0,0,0" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsTotal}" Value="True">
-                                                            <Setter Property="Margin" Value="0" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </DockPanel.Style>
-                                            <!-- Computer-Zeile: Auf-/Zuklappen und Symbol -->
-                                            <Button DockPanel.Dock="Left" Style="{StaticResource ChevronButton}" Visibility="{Binding IsTotal, Converter={StaticResource BoolVis}}"
-                                                    Command="{Binding DataContext.ToggleProcessesCommand, RelativeSource={RelativeSource AncestorType=Window}}">
-                                                <Path Data="M2,4 L6,8 L10,4" Stroke="{DynamicResource TextMuted}" StrokeThickness="1.8" StrokeLineJoin="Round"
-                                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" Width="12" Height="12" RenderTransformOrigin="0.5,0.5">
-                                                    <Path.Style>
-                                                        <Style TargetType="Path">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding DataContext.ProcessesExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False">
-                                                                    <Setter Property="RenderTransform"><Setter.Value><RotateTransform Angle="-90" /></Setter.Value></Setter>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </Path.Style>
-                                                </Path>
-                                            </Button>
-                                            <Path DockPanel.Dock="Left" Data="M1.5,1.5 H14.5 V10.5 H1.5 Z M5.5,14 H10.5 M8,10.5 V14" Stroke="{DynamicResource TextPrimary}" StrokeThickness="1.5"
-                                                  StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Width="16" Height="16" Margin="0,0,10,0"
-                                                  VerticalAlignment="Center" Visibility="{Binding IsTotal, Converter={StaticResource BoolVis}}" />
-                                            <Image DockPanel.Dock="Left" Source="{Binding Icon}" Width="18" Height="18" Margin="0,0,10,0">
-                                                <Image.Style>
-                                                    <Style TargetType="Image">
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsTotal}" Value="True"><Setter Property="Visibility" Value="Collapsed" /></DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Image.Style>
-                                            </Image>
-                                            <TextBlock VerticalAlignment="Center" TextTrimming="CharacterEllipsis">
-                                                <Run Text="{Binding Title, Mode=OneWay}" FontWeight="SemiBold" /><Run Text="{Binding ExeHint, Mode=OneWay, StringFormat='  {0}'}"
-                                                     Foreground="{DynamicResource TextMuted}" FontSize="11.5" />
-                                            </TextBlock>
-                                        </DockPanel>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="↓ RATE" Width="90" HeaderStyle="{StaticResource RightHeader}" ElementStyle="{StaticResource DownText}"
-                                                Binding="{Binding DownRate, Converter={StaticResource Bytes}, ConverterParameter=rate}" />
-                            <DataGridTextColumn Header="↑ RATE" Width="90" HeaderStyle="{StaticResource RightHeader}" ElementStyle="{StaticResource UpText}"
-                                                Binding="{Binding UpRate, Converter={StaticResource Bytes}, ConverterParameter=rate}" />
-                            <DataGridTemplateColumn Header="↓ LIMIT (KB/S)" Width="105" HeaderStyle="{StaticResource RightHeader}">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBox Style="{StaticResource CellBox}"
-                                                 Text="{Binding DownLimitKb, Converter={StaticResource Limit}, ConverterParameter=blank, UpdateSourceTrigger=LostFocus}" Tag="∞" />
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="↑ LIMIT (KB/S)" Width="105" HeaderStyle="{StaticResource RightHeader}">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBox Style="{StaticResource CellBox}"
-                                                 Text="{Binding UpLimitKb, Converter={StaticResource Limit}, ConverterParameter=blank, UpdateSourceTrigger=LostFocus}" Tag="∞" />
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="{local:T col_rules}" Width="85" HeaderStyle="{StaticResource LeftHeader}">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <Grid Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{local:T block}"
-                                                  Visibility="{Binding Block, Converter={StaticResource BoolVis}}">
-                                                <Ellipse Fill="{DynamicResource Danger}" />
-                                                <Rectangle Width="8" Height="2" RadiusX="1" RadiusY="1" Fill="White" />
-                                            </Grid>
-                                            <TextBlock Text="{Binding RuleSummary}" Style="{StaticResource Muted}"
-                                                       VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </Grid>
-            </Border>
-
-            <!-- Rechts: Details + Chart -->
-            <Grid Grid.Column="2">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-
-                <Border Style="{StaticResource Card}">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <Grid>
-                            <!-- Gesamtansicht (keine App gewählt) -->
-                            <StackPanel>
-                                <StackPanel.Style>
-                                    <Style TargetType="StackPanel">
-                                        <Setter Property="Visibility" Value="Collapsed" />
+                <Border Grid.Column="1" BorderBrush="{DynamicResource CardBorder}" BorderThickness="1,0,0,0" Padding="20,10,24,4"
+                        Visibility="{Binding ShowChart, Converter={StaticResource BoolVis}}">
+                    <Grid MinHeight="150">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <StackPanel Orientation="Horizontal" Height="26">
+                            <TextBlock Text="{Binding ChartTitle}" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis" MaxWidth="320" />
+                            <Button Content="{local:T chart_show_total}" Command="{Binding ShowTotalCommand}" Margin="10,0,0,0">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource Chip}">
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding Selected.IsTotal}" Value="True">
-                                                <Setter Property="Visibility" Value="Visible" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </StackPanel.Style>
-                                <TextBlock Text="{Binding TotalRow.Name}" FontSize="20" FontWeight="SemiBold" />
-                                <TextBlock Text="{local:T total_hint}" Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,6,0,0" />
-                                <TextBlock Text="{local:T global_limit}" Style="{StaticResource Section}" />
-                                <Grid>
-                                    <Grid.ColumnDefinitions><ColumnDefinition Width="100" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions><RowDefinition /><RowDefinition /></Grid.RowDefinitions>
-                                    <TextBlock Text="↓ Download" Style="{StaticResource InfoKey}" />
-                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                        <TextBox Text="{Binding GlobalDownKb, Converter={StaticResource Limit}, UpdateSourceTrigger=LostFocus}"
-                                                 Style="{StaticResource LimitBox}" ToolTip="{local:T tip_global_down}" />
-                                        <TextBlock Text="KB/s" Style="{StaticResource InfoKey}" Margin="8,0,0,0" />
-                                    </StackPanel>
-                                    <TextBlock Grid.Row="1" Text="↑ Upload" Style="{StaticResource InfoKey}" />
-                                    <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
-                                        <TextBox Text="{Binding GlobalUpKb, Converter={StaticResource Limit}, UpdateSourceTrigger=LostFocus}"
-                                                 Style="{StaticResource LimitBox}" ToolTip="{local:T tip_global_up}" />
-                                        <TextBlock Text="KB/s" Style="{StaticResource InfoKey}" Margin="8,0,0,0" />
-                                    </StackPanel>
-                                </Grid>
-                            </StackPanel>
-
-                            <!-- Details der gewählten Anwendung -->
-                            <StackPanel DataContext="{Binding Selected}">
-                                <StackPanel.Style>
-                                    <Style TargetType="StackPanel">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding DataContext.Selected.IsTotal, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
                                                 <Setter Property="Visibility" Value="Collapsed" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
-                                </StackPanel.Style>
-                                <StackPanel Orientation="Horizontal">
-                                    <Image Source="{Binding Icon}" Width="32" Height="32" Margin="0,0,12,0" />
-                                    <TextBlock Text="{Binding Title}" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center"
-                                               TextTrimming="CharacterEllipsis" />
-                                </StackPanel>
-                                <TextBlock Text="{Binding Path}" Style="{StaticResource Muted}" TextWrapping="Wrap" MaxHeight="34"
-                                           TextTrimming="CharacterEllipsis" Margin="0,8,0,0" ToolTip="{Binding Path}" />
-
-                                <TextBlock Text="{local:T sec_rules}" Style="{StaticResource Section}" />
-                                <Grid>
-                                    <Grid.ColumnDefinitions><ColumnDefinition Width="100" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
-                                    </Grid.RowDefinitions>
-                                    <TextBlock Text="{local:T lbl_firewall}" Style="{StaticResource InfoKey}" />
-                                    <ToggleButton Grid.Column="1" Content="{local:T block}" Style="{StaticResource BlockToggle}"
-                                                  HorizontalAlignment="Left" Margin="0,3"
-                                                  IsChecked="{Binding Block, UpdateSourceTrigger=PropertyChanged}" />
-                                    <TextBlock Grid.Row="1" Text="{local:T lbl_limit_down}" Style="{StaticResource InfoKey}" />
-                                    <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
-                                        <TextBox Text="{Binding DownLimitKb, Converter={StaticResource Limit}, UpdateSourceTrigger=LostFocus}"
-                                                 Style="{StaticResource LimitBox}" />
-                                        <TextBlock Text="KB/s" Style="{StaticResource InfoKey}" Margin="8,0,0,0" />
-                                    </StackPanel>
-                                    <TextBlock Grid.Row="2" Text="{local:T lbl_limit_up}" Style="{StaticResource InfoKey}" />
-                                    <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
-                                        <TextBox Text="{Binding UpLimitKb, Converter={StaticResource Limit}, UpdateSourceTrigger=LostFocus}"
-                                                 Style="{StaticResource LimitBox}" />
-                                        <TextBlock Text="KB/s" Style="{StaticResource InfoKey}" Margin="8,0,0,0" />
-                                    </StackPanel>
-                                    <TextBlock Grid.Row="3" Text="{local:T info_prio}" Style="{StaticResource InfoKey}" />
-                                    <ComboBox Grid.Row="3" Grid.Column="1" ItemsSource="{x:Static local:MainViewModel.Priorities}"
-                                              SelectedItem="{Binding Priority, UpdateSourceTrigger=PropertyChanged}" Width="130" HorizontalAlignment="Left" Margin="0,3">
-                                        <ComboBox.ItemTemplate>
-                                            <DataTemplate>
-                                                <TextBlock>
-                                                    <TextBlock.Text>
-                                                        <MultiBinding Converter="{StaticResource PrioName}">
-                                                            <Binding />
-                                                            <Binding Path="Lang" Source="{x:Static local:Loc.Instance}" />
-                                                        </MultiBinding>
-                                                    </TextBlock.Text>
-                                                </TextBlock>
-                                            </DataTemplate>
-                                        </ComboBox.ItemTemplate>
-                                    </ComboBox>
-                                </Grid>
-                                <Button Content="{local:T ctx_reset}" Style="{StaticResource Chip}" HorizontalAlignment="Left" Margin="0,12,0,0"
-                                        Command="{Binding DataContext.ResetCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                        CommandParameter="{Binding}" />
-
-                                <TextBlock Text="{local:T sec_stats}" Style="{StaticResource Section}" />
-                                <Grid>
-                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
-                                    </Grid.RowDefinitions>
-                                    <TextBlock Text="↓ Rate" Style="{StaticResource InfoKey}" />
-                                    <TextBlock Grid.Column="1" Style="{StaticResource InfoVal}" Foreground="{DynamicResource DownBrush}"
-                                               Text="{Binding DownRate, Converter={StaticResource Bytes}, ConverterParameter=rate}" />
-                                    <TextBlock Grid.Row="1" Text="↑ Rate" Style="{StaticResource InfoKey}" />
-                                    <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoVal}" Foreground="{DynamicResource UpBrush}"
-                                               Text="{Binding UpRate, Converter={StaticResource Bytes}, ConverterParameter=rate}" />
-                                    <TextBlock Grid.Row="2" Text="{local:T info_peak}" Style="{StaticResource InfoKey}" />
-                                    <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource InfoVal}">
-                                        <Run Text="{Binding PeakDown, Converter={StaticResource Bytes}, Mode=OneWay}" /><Run Text="  /  " /><Run Text="{Binding PeakUp, Converter={StaticResource Bytes}, Mode=OneWay}" />
-                                    </TextBlock>
-                                    <TextBlock Grid.Row="3" Text="{local:T info_total_down}" Style="{StaticResource InfoKey}" />
-                                    <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource InfoVal}"
-                                               Text="{Binding TotalDown, Converter={StaticResource Bytes}}" />
-                                    <TextBlock Grid.Row="4" Text="{local:T info_total_up}" Style="{StaticResource InfoKey}" />
-                                    <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource InfoVal}"
-                                               Text="{Binding TotalUp, Converter={StaticResource Bytes}}" />
-                                </Grid>
-                            </StackPanel>
-                        </Grid>
-                    </ScrollViewer>
-                </Border>
-
-                <!-- Chart -->
-                <Border Grid.Row="1" Style="{StaticResource Card}" Height="210" Margin="0,16,0,0"
-                        Visibility="{Binding ShowChart, Converter={StaticResource BoolVis}}">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="10" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-                        <DockPanel>
-                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                                <Ellipse Width="9" Height="9" Fill="{DynamicResource DownBrush}" VerticalAlignment="Center" />
-                                <TextBlock Text="Download" Style="{StaticResource Muted}" Margin="6,0,14,0" VerticalAlignment="Center" />
-                                <Ellipse Width="9" Height="9" Fill="{DynamicResource UpBrush}" VerticalAlignment="Center" />
-                                <TextBlock Text="Upload" Style="{StaticResource Muted}" Margin="6,0,0,0" VerticalAlignment="Center" />
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding ChartTitle}" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center"
-                                           TextTrimming="CharacterEllipsis" MaxWidth="150" />
-                                <Button Content="{local:T chart_show_total}" Command="{Binding ShowTotalCommand}" Margin="10,0,0,0">
-                                    <Button.Style>
-                                        <Style TargetType="Button" BasedOn="{StaticResource Chip}">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Selected.IsTotal}" Value="True">
-                                                    <Setter Property="Visibility" Value="Collapsed" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Button.Style>
-                                </Button>
-                            </StackPanel>
-                        </DockPanel>
-                        <local:RateChart Grid.Row="2" Samples="{Binding ChartSamples}" />
+                                </Button.Style>
+                            </Button>
+                        </StackPanel>
+                        <local:RateChart Grid.Row="1" Samples="{Binding ChartSamples}" />
                     </Grid>
                 </Border>
             </Grid>
+        </Border>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MinWidth="640" />
+                <ColumnDefinition Width="380" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Links: Prozessliste -->
+            <Grid Margin="24,16,16,8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="10" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <DockPanel>
+                    <Grid DockPanel.Dock="Right" Width="230" Height="32">
+                        <TextBox Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource Input}"
+                                 Tag="{local:T search_ph}" FontSize="13" Padding="32,0,8,0" />
+                        <Path Data="M10,6 A4,4 0 1 1 2,6 A4,4 0 1 1 10,6 M9,9 L13,13" Stroke="{DynamicResource TextMuted}" StrokeThickness="1.6"
+                              StrokeStartLineCap="Round" StrokeEndLineCap="Round" Width="14" Height="14"
+                              HorizontalAlignment="Left" VerticalAlignment="Center" Margin="11,0,0,0" IsHitTestVisible="False" />
+                    </Grid>
+                    <ToggleButton Content="{local:T filter_active}" IsChecked="{Binding OnlyActive}" Style="{StaticResource ChipToggle}"
+                                  Padding="12,5" FontSize="13" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                </DockPanel>
+
+                <DataGrid Grid.Row="2" Style="{StaticResource ModernGrid}" ItemsSource="{Binding View}"
+                          SelectedItem="{Binding Selected}" IsReadOnly="True">
+                    <DataGrid.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="{local:T ctx_reset}" Command="{Binding ResetCommand}"
+                                      CommandParameter="{Binding Selected}" />
+                        </ContextMenu>
+                    </DataGrid.ContextMenu>
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="" Width="*" MinWidth="160" HeaderStyle="{StaticResource LeftHeader}">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <DockPanel LastChildFill="True">
+                                        <DockPanel.Style>
+                                            <Style TargetType="DockPanel">
+                                                <Setter Property="Margin" Value="24,0,0,0" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsTotal}" Value="True">
+                                                        <Setter Property="Margin" Value="0" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </DockPanel.Style>
+                                        <!-- Computer-Zeile: Auf-/Zuklappen und Symbol -->
+                                        <Button DockPanel.Dock="Left" Style="{StaticResource ChevronButton}" Visibility="{Binding IsTotal, Converter={StaticResource BoolVis}}"
+                                                Command="{Binding DataContext.ToggleProcessesCommand, RelativeSource={RelativeSource AncestorType=Window}}">
+                                            <Path Data="M2,4 L6,8 L10,4" Stroke="{DynamicResource TextMuted}" StrokeThickness="1.8" StrokeLineJoin="Round"
+                                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" Width="12" Height="12" RenderTransformOrigin="0.5,0.5">
+                                                <Path.Style>
+                                                    <Style TargetType="Path">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding DataContext.ProcessesExpanded, RelativeSource={RelativeSource AncestorType=Window}}" Value="False">
+                                                                <Setter Property="RenderTransform"><Setter.Value><RotateTransform Angle="-90" /></Setter.Value></Setter>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Path.Style>
+                                            </Path>
+                                        </Button>
+                                        <Path DockPanel.Dock="Left" Data="M1.5,1.5 H14.5 V10.5 H1.5 Z M5.5,14 H10.5 M8,10.5 V14" Stroke="{DynamicResource TextPrimary}" StrokeThickness="1.5"
+                                              StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Width="16" Height="16" Margin="0,0,10,0"
+                                              VerticalAlignment="Center" Visibility="{Binding IsTotal, Converter={StaticResource BoolVis}}" />
+                                        <Image DockPanel.Dock="Left" Source="{Binding Icon}" Width="18" Height="18" Margin="0,0,10,0">
+                                            <Image.Style>
+                                                <Style TargetType="Image">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsTotal}" Value="True"><Setter Property="Visibility" Value="Collapsed" /></DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Image.Style>
+                                        </Image>
+                                        <TextBlock VerticalAlignment="Center" TextTrimming="CharacterEllipsis">
+                                            <Run Text="{Binding Title, Mode=OneWay}" FontWeight="SemiBold" /><Run Text="{Binding ExeHint, Mode=OneWay, StringFormat='  {0}'}"
+                                                 Foreground="{DynamicResource TextMuted}" FontSize="12" />
+                                        </TextBlock>
+                                    </DockPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Down rate" Width="95" HeaderStyle="{StaticResource DownHeader}" ElementStyle="{StaticResource DownText}"
+                                            Binding="{Binding DownRate, Converter={StaticResource Bytes}, ConverterParameter=rate}" />
+                        <DataGridTextColumn Header="Up rate" Width="95" HeaderStyle="{StaticResource UpHeader}" ElementStyle="{StaticResource UpText}"
+                                            Binding="{Binding UpRate, Converter={StaticResource Bytes}, ConverterParameter=rate}" />
+                        <DataGridTemplateColumn Header="Down limit KB/s" Width="125" HeaderStyle="{StaticResource RightHeader}">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBox Style="{StaticResource CellBox}"
+                                             Text="{Binding DownLimitKb, Converter={StaticResource Limit}, ConverterParameter=blank, UpdateSourceTrigger=LostFocus}" Tag="∞" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Up limit KB/s" Width="125" HeaderStyle="{StaticResource RightHeader}">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBox Style="{StaticResource CellBox}"
+                                             Text="{Binding UpLimitKb, Converter={StaticResource Limit}, ConverterParameter=blank, UpdateSourceTrigger=LostFocus}" Tag="∞" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="{local:T col_rules}" Width="90" HeaderStyle="{StaticResource LeftHeader}">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Grid Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{local:T block}"
+                                              Visibility="{Binding Block, Converter={StaticResource BoolVis}}">
+                                            <Ellipse Fill="{DynamicResource Danger}" />
+                                            <Rectangle Width="8" Height="2" RadiusX="1" RadiusY="1" Fill="{DynamicResource OnDanger}" />
+                                        </Grid>
+                                        <TextBlock Text="{Binding RuleSummary}" Style="{StaticResource Muted}"
+                                                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+
+            <!-- Rechts: Prüfer -->
+            <Border Grid.Column="1" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource CardBorder}" BorderThickness="1,1,0,0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <Grid Margin="24,20">
+                        <!-- Gesamtansicht (keine App gewählt) -->
+                        <StackPanel>
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Selected.IsTotal}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <TextBlock Text="{Binding TotalRow.Name}" FontSize="18" FontWeight="SemiBold" />
+                            <TextBlock Text="{local:T total_hint}" Style="{StaticResource Muted}" FontSize="13" TextWrapping="Wrap" Margin="0,6,0,0" />
+                            <TextBlock Text="{local:T global_limit}" Style="{StaticResource Section}" />
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="100" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions><RowDefinition /><RowDefinition /></Grid.RowDefinitions>
+                                <TextBlock Text="Download" Style="{StaticResource InfoKey}" />
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <TextBox Text="{Binding GlobalDownKb, Converter={StaticResource Limit}, UpdateSourceTrigger=LostFocus}"
+                                             Style="{StaticResource LimitBox}" ToolTip="{local:T tip_global_down}" />
+                                    <TextBlock Text="KB/s" Style="{StaticResource InfoKey}" Margin="8,0,0,0" />
+                                </StackPanel>
+                                <TextBlock Grid.Row="1" Text="Upload" Style="{StaticResource InfoKey}" />
+                                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+                                    <TextBox Text="{Binding GlobalUpKb, Converter={StaticResource Limit}, UpdateSourceTrigger=LostFocus}"
+                                             Style="{StaticResource LimitBox}" ToolTip="{local:T tip_global_up}" />
+                                    <TextBlock Text="KB/s" Style="{StaticResource InfoKey}" Margin="8,0,0,0" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Details der gewählten Anwendung -->
+                        <StackPanel DataContext="{Binding Selected}">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DataContext.Selected.IsTotal, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="{Binding Icon}" Width="28" Height="28" Margin="0,0,12,0" />
+                                <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis" MaxWidth="290" />
+                            </StackPanel>
+                            <TextBlock Text="{Binding Path}" Style="{StaticResource Muted}" TextWrapping="Wrap" MaxHeight="34"
+                                       TextTrimming="CharacterEllipsis" Margin="0,8,0,0" ToolTip="{Binding Path}" />
+
+                            <TextBlock Text="{local:T sec_rules}" Style="{StaticResource Section}" />
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="100" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="{local:T lbl_firewall}" Style="{StaticResource InfoKey}" />
+                                <ToggleButton Grid.Column="1" Content="{local:T block}" Style="{StaticResource BlockToggle}"
+                                              Margin="0,3"
+                                              IsChecked="{Binding Block, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Grid.Row="1" Text="{local:T lbl_limit_down}" Style="{StaticResource InfoKey}" />
+                                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+                                    <TextBox Text="{Binding DownLimitKb, Converter={StaticResource Limit}, UpdateSourceTrigger=LostFocus}"
+                                             Style="{StaticResource LimitBox}" />
+                                    <TextBlock Text="KB/s" Style="{StaticResource InfoKey}" Margin="8,0,0,0" />
+                                </StackPanel>
+                                <TextBlock Grid.Row="2" Text="{local:T lbl_limit_up}" Style="{StaticResource InfoKey}" />
+                                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
+                                    <TextBox Text="{Binding UpLimitKb, Converter={StaticResource Limit}, UpdateSourceTrigger=LostFocus}"
+                                             Style="{StaticResource LimitBox}" />
+                                    <TextBlock Text="KB/s" Style="{StaticResource InfoKey}" Margin="8,0,0,0" />
+                                </StackPanel>
+                                <TextBlock Grid.Row="3" Text="{local:T info_prio}" Style="{StaticResource InfoKey}" />
+                                <ComboBox Grid.Row="3" Grid.Column="1" ItemsSource="{x:Static local:MainViewModel.Priorities}"
+                                          SelectedItem="{Binding Priority, UpdateSourceTrigger=PropertyChanged}" Width="130" HorizontalAlignment="Left" Margin="0,3">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock>
+                                                <TextBlock.Text>
+                                                    <MultiBinding Converter="{StaticResource PrioName}">
+                                                        <Binding />
+                                                        <Binding Path="Lang" Source="{x:Static local:Loc.Instance}" />
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </Grid>
+                            <Button Content="{local:T ctx_reset}" Style="{StaticResource Chip}" HorizontalAlignment="Left" Margin="0,14,0,0"
+                                    Command="{Binding DataContext.ResetCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    CommandParameter="{Binding}" />
+
+                            <TextBlock Text="{local:T sec_stats}" Style="{StaticResource Section}" />
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="Down rate" Style="{StaticResource InfoKey}" />
+                                <TextBlock Grid.Column="1" Style="{StaticResource InfoVal}" Foreground="{DynamicResource DownBrush}"
+                                           Text="{Binding DownRate, Converter={StaticResource Bytes}, ConverterParameter=rate}" />
+                                <TextBlock Grid.Row="1" Text="Up rate" Style="{StaticResource InfoKey}" />
+                                <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoVal}" Foreground="{DynamicResource UpBrush}"
+                                           Text="{Binding UpRate, Converter={StaticResource Bytes}, ConverterParameter=rate}" />
+                                <TextBlock Grid.Row="2" Text="{local:T info_peak}" Style="{StaticResource InfoKey}" />
+                                <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource InfoVal}">
+                                    <Run Text="{Binding PeakDown, Converter={StaticResource Bytes}, Mode=OneWay}" /><Run Text="  /  " /><Run Text="{Binding PeakUp, Converter={StaticResource Bytes}, Mode=OneWay}" />
+                                </TextBlock>
+                                <TextBlock Grid.Row="3" Text="{local:T info_total_down}" Style="{StaticResource InfoKey}" />
+                                <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource InfoVal}"
+                                           Text="{Binding TotalDown, Converter={StaticResource Bytes}}" />
+                                <TextBlock Grid.Row="4" Text="{local:T info_total_up}" Style="{StaticResource InfoKey}" />
+                                <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource InfoVal}"
+                                           Text="{Binding TotalUp, Converter={StaticResource Bytes}}" />
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+                </ScrollViewer>
+            </Border>
         </Grid>
     </Grid>
 </Window>

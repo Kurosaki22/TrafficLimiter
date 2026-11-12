@@ -1,0 +1,43 @@
+# Every merge to main publishes a new GitHub release. The version comes from TrafficLimiter.App.csproj,
+# so each PR must bump <Version>; the job fails if that tag already exists.
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Read version
+        id: v
+        shell: pwsh
+        run: |
+          $ver = ([xml](Get-Content TrafficLimiter.App/TrafficLimiter.App.csproj)).Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1
+          "tag=v$ver" >> $env:GITHUB_OUTPUT
+      - name: Fail if the version was not bumped
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "${{ steps.v.outputs.tag }}" *> $null
+          if ($LASTEXITCODE -eq 0) { throw "Release ${{ steps.v.outputs.tag }} already exists. Bump <Version> in TrafficLimiter.App.csproj." }
+      - run: dotnet test
+      - run: dotnet publish TrafficLimiter.App -p:PublishProfile=SingleFile
+      - run: dotnet publish TrafficLimiter.App -p:PublishProfile=SingleFileSmall
+      - name: Create release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          Copy-Item publish-small/TrafficLimiter.exe TrafficLimiter-small.exe
+          gh release create "${{ steps.v.outputs.tag }}" publish/TrafficLimiter.exe TrafficLimiter-small.exe `
+            --title "TrafficLimiter ${{ steps.v.outputs.tag }}" --generate-notes
