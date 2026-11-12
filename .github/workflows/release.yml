@@ -30,6 +30,7 @@ jobs:
         run: |
           gh release view "${{ steps.v.outputs.tag }}" *> $null
           if ($LASTEXITCODE -eq 0) { throw "Release ${{ steps.v.outputs.tag }} already exists. Bump <Version> in TrafficLimiter.App.csproj." }
+          exit 0 # gh exits 1 when the release does not exist, which is the good case
       - run: dotnet test
       - run: dotnet publish TrafficLimiter.App -p:PublishProfile=SingleFile
       - run: dotnet publish TrafficLimiter.App -p:PublishProfile=SingleFileSmall
