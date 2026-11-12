@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!-- NativeLoader uses a module initializer on purpose: it must run before the first WinDivert P/Invoke -->
+    <NoWarn>$(NoWarn);CA2255</NoWarn>
+    <DebugType Condition="'$(Configuration)' == 'Release'">none</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- WinDivert (driver + DLL) is embedded and extracted at runtime, see NativeLoader.cs -->
+    <EmbeddedResource Include="native\*" LogicalName="%(Filename)%(Extension)" />
+  </ItemGroup>
+
+</Project>

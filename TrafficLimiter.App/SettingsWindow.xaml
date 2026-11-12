@@ -1,0 +1,34 @@
+<Window x:Class="TrafficLimiter.App.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:TrafficLimiter.App"
+        Title="{local:T set_title}" Width="520" SizeToContent="Height" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        Background="{DynamicResource WindowBg}" Foreground="{DynamicResource TextPrimary}"
+        FontFamily="Segoe UI Variable Text">
+    <StackPanel Margin="22">
+        <Border Style="{StaticResource Card}">
+            <StackPanel>
+                <TextBlock Text="{local:T set_language}" FontWeight="SemiBold" />
+                <ComboBox SelectedValue="{Binding Language}" SelectedValuePath="Tag" Margin="0,8,0,0" HorizontalAlignment="Left" MinWidth="260">
+                    <ComboBoxItem Tag="auto" Content="{local:T lang_auto}" />
+                    <ComboBoxItem Tag="de" Content="Deutsch" />
+                    <ComboBoxItem Tag="en" Content="English" />
+                </ComboBox>
+
+                <Rectangle Height="1" Fill="{DynamicResource CardBorder}" Margin="0,18" />
+
+                <CheckBox IsChecked="{Binding Autostart}" Content="{local:T set_autostart}" FontWeight="SemiBold" />
+                <TextBlock Text="{local:T set_autostart_desc}" Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="28,2,0,0" />
+
+                <CheckBox IsChecked="{Binding StartMinimized}" Content="{local:T set_minimized}" FontWeight="SemiBold" Margin="0,16,0,0" />
+                <TextBlock Text="{local:T set_minimized_desc}" Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="28,2,0,0" />
+
+                <Rectangle Height="1" Fill="{DynamicResource CardBorder}" Margin="0,18" />
+                <TextBlock Text="{local:T set_engine_desc}" Style="{StaticResource Muted}" TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+        <Button Content="{local:T btn_close}" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Right"
+                Margin="0,16,0,0" IsDefault="True" IsCancel="True" />
+    </StackPanel>
+</Window>

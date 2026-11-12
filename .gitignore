@@ -1,0 +1,18 @@
+# Build output
+bin/
+obj/
+publish/
+publish-small/
+
+# IDE / user files
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# Local copy of the official WinDivert download (only its x64 DLL/SYS are used, see TrafficLimiter.Core/native)
+WinDivert-2.2.2-A/
+
+# Test results
+TestResults/
