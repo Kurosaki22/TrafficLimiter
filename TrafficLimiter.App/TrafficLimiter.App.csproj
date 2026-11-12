@@ -10,7 +10,7 @@
     <NoWarn>$(NoWarn);WPF0001</NoWarn>      <!-- ThemeMode (Fluent) is flagged experimental -->
     <AssemblyName>TrafficLimiter</AssemblyName>
     <ApplicationIcon>app.ico</ApplicationIcon>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <Product>TrafficLimiter</Product>
     <AssemblyTitle>TrafficLimiter</AssemblyTitle>
     <Description>Per-application bandwidth limiter and firewall for Windows</Description>

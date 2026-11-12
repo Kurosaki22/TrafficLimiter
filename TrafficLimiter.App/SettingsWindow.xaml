@@ -5,7 +5,7 @@
         Title="{local:T set_title}" Width="520" SizeToContent="Height" ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
         Background="{DynamicResource WindowBg}" Foreground="{DynamicResource TextPrimary}"
-        FontFamily="Segoe UI Variable Text">
+        FontFamily="{StaticResource UiFont}">
     <StackPanel Margin="22">
         <Border Style="{StaticResource Card}">
             <StackPanel>

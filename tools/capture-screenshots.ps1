@@ -94,7 +94,7 @@ try {
     $proc = Get-Process TrafficLimiter
     $h = $proc.MainWindowHandle
     [Win]::ShowWindow($h, 9) | Out-Null
-    [Win]::MoveWindow($h, 40, 20, 1650, 1100, $true) | Out-Null
+    [Win]::MoveWindow($h, 40, 10, 1650, 1200, $true) | Out-Null
     [Win]::SetForegroundWindow($h) | Out-Null
     Start-Sleep 3
     $win = [System.Windows.Automation.AutomationElement]::FromHandle($h)
