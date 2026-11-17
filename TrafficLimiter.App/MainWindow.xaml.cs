@@ -12,7 +12,7 @@ public partial class MainWindow : Window
 
     public bool StartHidden => _vm.StartMinimized;
 
-    /// <summary>Version aus dem csproj, ohne das Git-Hash-Suffix (+abc123).</summary>
+    /// <summary>Version from the csproj, without the git hash suffix (+abc123).</summary>
     public static string AppVersion { get; } = "v" + (System.Reflection.CustomAttributeExtensions.GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>(
         System.Reflection.Assembly.GetExecutingAssembly())?.InformationalVersion ?? "?").Split('+')[0];
 
@@ -20,14 +20,14 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         DataContext = _vm;
-        Application.Current.SessionEnding += (_, _) => _exit = true; // Abmelden/Herunterfahren nicht blockieren
+        Application.Current.SessionEnding += (_, _) => _exit = true; // don't block logoff/shutdown
 
         using (var icon = Application.GetResourceStream(new Uri("pack://application:,,,/app.ico"))!.Stream)
             _tray.Icon = new System.Drawing.Icon(icon, WinForms.SystemInformation.SmallIconSize);
         _tray.Visible = true;
         _tray.DoubleClick += (_, _) => ShowWindow();
         _tray.ContextMenuStrip = new();
-        _tray.ContextMenuStrip.Opening += (_, _) => BuildTrayMenu(); // Zustand (Pause, Profil, Engine) beim Öffnen aktuell
+        _tray.ContextMenuStrip.Opening += (_, _) => BuildTrayMenu(); // keep state (pause, profile, engine) current when opened
         BuildTrayMenu();
         Loc.Instance.Changed += BuildTrayMenu;
         _vm.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(MainViewModel.Totals)) _tray.Text = _vm.Totals; };
@@ -53,7 +53,7 @@ public partial class MainWindow : Window
 
     void OpenSettings(object sender, RoutedEventArgs e) => new SettingsWindow { Owner = this, DataContext = _vm }.ShowDialog();
 
-    /// <summary>Profil-Menü: wechseln, aktuelle Einstellungen speichern, aktives Profil löschen.</summary>
+    /// <summary>Profile menu: switch, save current settings, delete the active profile.</summary>
     void OpenProfiles(object sender, RoutedEventArgs e)
     {
         var menu = new ContextMenu
@@ -85,7 +85,7 @@ public partial class MainWindow : Window
 
     protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
     {
-        if (!_exit) { e.Cancel = true; Hide(); return; } // Schließen = in den Tray
+        if (!_exit) { e.Cancel = true; Hide(); return; } // closing = minimize to tray
         _tray.Dispose();
         _vm.Shutdown();
         base.OnClosing(e);

@@ -2,7 +2,7 @@ using System.Windows;
 
 namespace TrafficLimiter.App;
 
-/// <summary>Kleine Namenseingabe (Profil speichern).</summary>
+/// <summary>Small name input (save profile).</summary>
 public partial class NameDialog : Window
 {
     public string ProfileName => NameBox.Text.Trim();

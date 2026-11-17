@@ -6,14 +6,14 @@ using TrafficLimiter.Core;
 
 namespace TrafficLimiter.App;
 
-/// <summary>Zweisprachige Texte (Deutsch/Englisch), live umschaltbar. In XAML: {local:T key}.</summary>
+/// <summary>Bilingual texts (German/English), switchable live. In XAML: {local:T key}.</summary>
 public sealed class Loc : INotifyPropertyChanged
 {
     public static Loc Instance { get; } = new();
     public event PropertyChangedEventHandler? PropertyChanged;
     public event Action? Changed;
 
-    /// <summary>Wirksame Sprache: "de" oder "en".</summary>
+    /// <summary>Effective language: "de" or "en".</summary>
     public string Lang { get; private set; } = "en";
 
     static readonly Dictionary<string, (string De, string En)> Table = new()
@@ -106,14 +106,14 @@ public sealed class Loc : INotifyPropertyChanged
     }
 }
 
-/// <summary>{local:T key} – bindet einen Text live an die aktuelle Sprache.</summary>
+/// <summary>{local:T key} – binds a text live to the current language.</summary>
 public class TExtension(string key) : MarkupExtension
 {
     public override object ProvideValue(IServiceProvider sp) =>
         new Binding($"[{key}]") { Source = Loc.Instance, Mode = BindingMode.OneWay }.ProvideValue(sp);
 }
 
-/// <summary>Priority + Sprache -> lokalisierter Name (die Sprache als 2. Wert löst das Neuzeichnen aus).</summary>
+/// <summary>Priority + language -> localized name (the language as 2nd value triggers the redraw).</summary>
 public class PriorityNameConverter : IMultiValueConverter
 {
     public object Convert(object[] v, Type t, object p, CultureInfo c) => Loc.T("prio_" + v[0]);
