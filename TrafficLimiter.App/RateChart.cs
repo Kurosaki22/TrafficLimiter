@@ -5,8 +5,8 @@ using System.Windows.Media;
 namespace TrafficLimiter.App;
 
 /// <summary>
-/// Flächen-/Liniendiagramm für Down/Up-Raten. Weiche Kurven (Catmull-Rom), zeitbasiert gleitend
-/// (läuft pro Frame weiter, nicht nur pro Messung) und mit animierter Y-Achse.
+/// Area/line chart for down/up rates. Smooth curves (Catmull-Rom), time-based scrolling
+/// (advances every frame, not only per sample) and with an animated Y axis.
 /// </summary>
 public class RateChart : FrameworkElement
 {
@@ -17,11 +17,11 @@ public class RateChart : FrameworkElement
     public IReadOnlyList<Sample> Samples { get => (IReadOnlyList<Sample>)GetValue(SamplesProperty); set => SetValue(SamplesProperty, value); }
 
     static readonly Color DownColor = Color.FromRgb(0x3B, 0x82, 0xF6), UpColor = Color.FromRgb(0xF5, 0x9E, 0x0B);
-    const double Delay = 0.5;       // Sekunden Verzögerung, damit der neueste Punkt sanft hereinläuft
+    const double Delay = 0.5;       // seconds of delay so the newest point slides in smoothly
     const double AxisHeight = 20;
 
     readonly Dictionary<string, FormattedText> _textCache = new();
-    double _max;                    // aktuell angezeigtes Maximum (animiert)
+    double _max;                    // currently displayed maximum (animated)
     bool _hooked;
 
     public RateChart()
@@ -45,7 +45,7 @@ public class RateChart : FrameworkElement
         return ft;
     }
 
-    /// <summary>Nächste "runde" Obergrenze (1/2/5 × 10^n).</summary>
+    /// <summary>Next "round" upper bound (1/2/5 × 10^n).</summary>
     static double Nice(double v)
     {
         double p = Math.Pow(10, Math.Floor(Math.Log10(v)));
@@ -62,7 +62,7 @@ public class RateChart : FrameworkElement
         double plotH = h - AxisHeight, bottom = plotH;
         double tRight = Clock.Now - Delay;
 
-        // Y-Achse: weich auf das nächste runde Maximum der sichtbaren Werte nachführen
+        // Y axis: ease towards the next round maximum of the visible values
         long peak = 0;
         foreach (var s in samples) if (s.T >= tRight - span) peak = Math.Max(peak, Math.Max(s.Down, s.Up));
         double target = Nice(Math.Max(peak * 1.15, 20 * 1024));
@@ -119,7 +119,7 @@ public class RateChart : FrameworkElement
             { LineJoin = PenLineJoin.Round, StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round }, line);
     }
 
-    /// <summary>Catmull-Rom-Spline als kubische Béziers; Kontrollpunkte bleiben über der Basislinie.</summary>
+    /// <summary>Catmull-Rom spline as cubic Béziers; control points stay above the baseline.</summary>
     static void Curve(StreamGeometryContext c, Point[] p, double bottom)
     {
         for (int i = 0; i < p.Length - 1; i++)

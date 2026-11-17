@@ -1,6 +1,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <!-- Oberfläche: neutrales Graphit, Farbe nur für Daten -->
+    <!-- Surface: neutral graphite, color only for data -->
     <SolidColorBrush x:Key="WindowBg" Color="#101113" />
     <SolidColorBrush x:Key="CardBg" Color="#16181B" />
     <SolidColorBrush x:Key="CardBorder" Color="#2A2D32" />
@@ -13,12 +13,12 @@
     <SolidColorBrush x:Key="DangerTint" Color="#2A1517" />
     <SolidColorBrush x:Key="ChartGrid" Color="#23262B" />
 
-    <!-- Auswahl, Fokus und Hauptaktion: Tinte, nie Datenfarbe -->
+    <!-- Selection, focus and primary action: ink, never a data color -->
     <SolidColorBrush x:Key="Accent" Color="#ECEDEF" />
     <SolidColorBrush x:Key="OnAccent" Color="#101113" />
     <SolidColorBrush x:Key="FocusRing" Color="#ECEDEF" />
 
-    <!-- Datenfarben (aus dem App-Symbol): Down blau, Up bernstein, Limit violett -->
+    <!-- Data colors (from the app icon): down blue, up amber, limit violet -->
     <SolidColorBrush x:Key="DownBrush" Color="#3B82F6" />
     <SolidColorBrush x:Key="UpBrush" Color="#F59E0B" />
     <SolidColorBrush x:Key="LimitBrush" Color="#A78BFA" />

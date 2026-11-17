@@ -1,8 +1,8 @@
 namespace TrafficLimiter.Core;
 
 /// <summary>
-/// Token-Bucket mit "Schulden": Pakete werden nie abgelehnt, sondern bekommen eine Wartezeit.
-/// reserve (0..1) hält einen Teil der Kapazität für höhere Prioritäten frei.
+/// Token bucket with "debt": packets are never rejected, they get a delay instead.
+/// reserve (0..1) keeps part of the capacity free for higher priorities.
 /// </summary>
 public sealed class TokenBucket
 {
@@ -18,13 +18,13 @@ public sealed class TokenBucket
         lock (_lock)
         {
             _rate = bytesPerSec;
-            _capacity = Math.Max(bytesPerSec * 0.25, 65536); // mind. ein Jumbo-Paket
+            _capacity = Math.Max(bytesPerSec * 0.25, 65536); // at least one jumbo packet
             _tokens = Math.Min(_tokens, _capacity);
             _last = now;
         }
     }
 
-    /// <summary>Bucket belasten; liefert Sekunden, die das Paket warten muss.</summary>
+    /// <summary>Charges the bucket; returns the seconds the packet must wait.</summary>
     public double Delay(int bytes, double now, double reserve = 0)
     {
         lock (_lock)

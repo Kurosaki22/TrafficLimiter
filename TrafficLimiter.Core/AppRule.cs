@@ -4,14 +4,14 @@ namespace TrafficLimiter.Core;
 
 public enum Priority { Low, Normal, High, Critical }
 
-/// <summary>Regel pro Anwendung (Pfad). Limits in Bytes/s, 0 = unbegrenzt.</summary>
+/// <summary>Rule per application (path). Limits in bytes/s, 0 = unlimited.</summary>
 public record AppRule(string AppPath, long DownLimit = 0, long UpLimit = 0, bool Block = false,
     Priority Priority = Priority.Normal, bool Enabled = true);
 
-/// <summary>Benannte Sammlung von Regeln + Gesamtlimits (z. B. "Gaming").</summary>
+/// <summary>Named collection of rules + overall limits (e.g. "Gaming").</summary>
 public record Profile(string Name, List<AppRule> Rules, long GlobalDownLimit = 0, long GlobalUpLimit = 0);
 
-/// <summary>Language: "auto" | "de" | "en". EngineEnabled = letzter Zustand der Traffic-Kontrolle (Standard: an).</summary>
+/// <summary>Language: "auto" | "de" | "en". EngineEnabled = last state of traffic control (default: on).</summary>
 public record Settings(List<AppRule> Rules, long GlobalDownLimit = 0, long GlobalUpLimit = 0,
     string Language = "auto", bool StartMinimized = false, bool Autostart = false, bool EngineEnabled = true, bool ShowChart = true,
     List<Profile>? Profiles = null, string? ActiveProfile = null);

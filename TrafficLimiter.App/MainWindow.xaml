@@ -34,7 +34,7 @@
             <Setter Property="Foreground" Value="{DynamicResource LimitBrush}" />
             <Setter Property="Margin" Value="0,2" />
         </Style>
-        <!-- Symbole: Kontur in der Vordergrundfarbe des Buttons -->
+        <!-- Icons: outline in the button's foreground color -->
         <Style x:Key="Icon" TargetType="Path">
             <Setter Property="Width" Value="16" />
             <Setter Property="Height" Value="16" />
@@ -56,7 +56,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Leiste: Name, Zustand, Steuerung -->
+        <!-- Bar: name, state, controls -->
         <Grid Margin="24,14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -106,7 +106,7 @@
             </StackPanel>
         </Grid>
 
-        <!-- Messband: die Live-Werte und die letzten 60 Sekunden -->
+        <!-- Measurement band: the live values and the last 60 seconds -->
         <Border Grid.Row="1" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource CardBorder}" BorderThickness="0,1">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -154,7 +154,7 @@
                 <ColumnDefinition Width="380" />
             </Grid.ColumnDefinitions>
 
-            <!-- Links: Prozessliste -->
+            <!-- Left: process list -->
             <Grid Margin="24,16,16,8">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -196,7 +196,7 @@
                                                 </Style.Triggers>
                                             </Style>
                                         </DockPanel.Style>
-                                        <!-- Computer-Zeile: Auf-/Zuklappen und Symbol -->
+                                        <!-- Computer row: expand/collapse and icon -->
                                         <Button DockPanel.Dock="Left" Style="{StaticResource ChevronButton}" Visibility="{Binding IsTotal, Converter={StaticResource BoolVis}}"
                                                 Command="{Binding DataContext.ToggleProcessesCommand, RelativeSource={RelativeSource AncestorType=Window}}">
                                             <Path Data="M2,4 L6,8 L10,4" Stroke="{DynamicResource TextMuted}" StrokeThickness="1.8" StrokeLineJoin="Round"
@@ -271,11 +271,11 @@
                 </DataGrid>
             </Grid>
 
-            <!-- Rechts: Prüfer -->
+            <!-- Right: inspector -->
             <Border Grid.Column="1" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource CardBorder}" BorderThickness="1,1,0,0">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <Grid Margin="24,20">
-                        <!-- Gesamtansicht (keine App gewählt) -->
+                        <!-- Overview (no app selected) -->
                         <StackPanel>
                             <StackPanel.Style>
                                 <Style TargetType="StackPanel">
@@ -308,7 +308,7 @@
                             </Grid>
                         </StackPanel>
 
-                        <!-- Details der gewählten Anwendung -->
+                        <!-- Details of the selected application -->
                         <StackPanel DataContext="{Binding Selected}">
                             <StackPanel.Style>
                                 <Style TargetType="StackPanel">

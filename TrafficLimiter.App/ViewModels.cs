@@ -12,7 +12,7 @@ using TrafficLimiter.Core;
 
 namespace TrafficLimiter.App;
 
-/// <summary>Ein Messpunkt: Zeit in Sekunden auf <see cref="Clock"/>, Raten in Bytes/s.</summary>
+/// <summary>One sample: time in seconds on <see cref="Clock"/>, rates in bytes/s.</summary>
 public readonly record struct Sample(double T, long Down, long Up);
 
 public static class Clock
@@ -32,7 +32,7 @@ public static class Fmt
     };
 }
 
-/// <summary>Bytes -> Text; ConverterParameter "rate" hängt "/s" an, 0 wird leer.</summary>
+/// <summary>Bytes -> Text; ConverterParameter "rate" appends "/s", 0 becomes empty.</summary>
 public class BytesConverter : IValueConverter
 {
     public object Convert(object value, Type t, object p, CultureInfo c)
@@ -44,7 +44,7 @@ public class BytesConverter : IValueConverter
     public object ConvertBack(object value, Type t, object p, CultureInfo c) => throw new NotSupportedException();
 }
 
-/// <summary>Limit in KB/s: 0 wird als ∞ angezeigt, Eingabe "∞"/leer/ungültig = 0.</summary>
+/// <summary>Limit in KB/s: 0 is shown as ∞, input "∞"/empty/invalid = 0.</summary>
 public class LimitConverter : IValueConverter
 {
     public object Convert(object value, Type t, object p, CultureInfo c) =>
@@ -55,21 +55,21 @@ public class LimitConverter : IValueConverter
 
 public partial class AppRow : ObservableObject
 {
-    public const int HistoryLen = 120;     // 60 s bei 0,5 s Takt
+    public const int HistoryLen = 120;     // 60 s at a 0.5 s interval
 
     public AppRow(string path, string name)
     {
         Path = path; Name = name; Title = ReadTitle(path, name);
-        Loc.Instance.Changed += () => OnPropertyChanged(nameof(RuleSummary)); // shortcut: Zeilen bleiben registriert, bei wenigen Dutzend Apps unkritisch
+        Loc.Instance.Changed += () => OnPropertyChanged(nameof(RuleSummary)); // shortcut: rows stay subscribed, harmless with a few dozen apps
     }
 
     public string Path { get; }
     public string Name { get; }
-    /// <summary>Lesbarer Name (Datei-Beschreibung, z. B. "Hostprozess für Windows-Dienste"), sonst der EXE-Name.</summary>
+    /// <summary>Readable name (file description, e.g. "Hostprozess für Windows-Dienste" = "Host Process for Windows Services"), otherwise the EXE name.</summary>
     public string Title { get; }
     public string ExeHint => Title != Name ? Name : "";
-    public bool IsTotal { get; init; }     // Sammelzeile "Computer" (Summen + Gesamtlimit)
-    public Action? Edited;                 // nur bei Benutzeränderungen von Limit/Block/Priorität
+    public bool IsTotal { get; init; }     // aggregate "Computer" row (totals + overall limit)
+    public Action? Edited;                 // only on user changes of limit/block/priority
     public readonly Queue<Sample> History = new();
 
     [ObservableProperty, NotifyPropertyChangedFor(nameof(TotalRate))] long downRate;
@@ -78,9 +78,9 @@ public partial class AppRow : ObservableObject
     [ObservableProperty] long totalUp;
     [ObservableProperty] long peakDown;
     [ObservableProperty] long peakUp;
-    [ObservableProperty, NotifyPropertyChangedFor(nameof(HasLimit))] long downLimitKb;   // KB/s, 0 = unbegrenzt
+    [ObservableProperty, NotifyPropertyChangedFor(nameof(HasLimit))] long downLimitKb;   // KB/s, 0 = unlimited
     [ObservableProperty, NotifyPropertyChangedFor(nameof(HasLimit))] long upLimitKb;
-    [ObservableProperty] bool isActive;   // Traffic in den letzten ~2 s (Hysterese gegen Flackern)
+    [ObservableProperty] bool isActive;   // traffic in the last ~2 s (hysteresis against flicker)
     [ObservableProperty] bool block;
     [ObservableProperty, NotifyPropertyChangedFor(nameof(RuleSummary))] Priority priority = Priority.Normal;
 
@@ -97,10 +97,10 @@ public partial class AppRow : ObservableObject
             var t = !string.IsNullOrWhiteSpace(v.FileDescription) ? v.FileDescription : v.ProductName;
             return string.IsNullOrWhiteSpace(t) ? name : t.Trim();
         }
-        catch { return name; } // Pfad ungültig ("System", "[x]") oder Datei weg
+        catch { return name; } // invalid path ("System", "[x]") or file gone
     }
 
-    /// <summary>Kurztext für die Liste: Priorität, falls nicht Normal (Limits haben eigene Spalten).</summary>
+    /// <summary>Short text for the list: priority, if not Normal (limits have their own columns).</summary>
     public string RuleSummary => Priority != Priority.Normal ? Loc.T("prio_" + Priority) : "";
 
     partial void OnDownLimitKbChanged(long value) => Edited?.Invoke();
@@ -125,7 +125,7 @@ public partial class AppRow : ObservableObject
                     _icon.Freeze();
                 }
             }
-            catch { } // Pfad ungültig (z. B. "[System]") -> kein Icon
+            catch { } // invalid path (e.g. "[System]") -> no icon
             return _icon;
         }
     }
@@ -144,7 +144,7 @@ public partial class AppRow : ObservableObject
     }
 }
 
-/// <summary>Computer-Zeile zuerst, danach alphabetisch nach angezeigtem Titel.</summary>
+/// <summary>Computer row first, then alphabetical by displayed title.</summary>
 sealed class RowComparer : System.Collections.IComparer
 {
     public int Compare(object? a, object? b)
@@ -199,7 +199,7 @@ public partial class MainViewModel : ObservableObject
     {
         var v = new ListCollectionView(Rows) { IsLiveFiltering = true, CustomSort = new RowComparer() };
         v.LiveFilteringProperties.Add(nameof(AppRow.IsActive));
-        // Computer-Zeile immer sichtbar; Prozesse nur wenn aufgeklappt oder gesucht wird, optional nur aktive
+        // Computer row always visible; processes only when expanded or searched, optionally only active ones
         v.Filter = o => o is AppRow r && (r.IsTotal || (ProcessesExpanded || Search != "") && (!OnlyActive || r.IsActive)
             && (r.Title.Contains(Search, StringComparison.OrdinalIgnoreCase) || r.Name.Contains(Search, StringComparison.OrdinalIgnoreCase)));
         View = v;
@@ -215,14 +215,14 @@ public partial class MainViewModel : ObservableObject
         _engineEnabled = s.EngineEnabled; ShowChart = s.ShowChart;
         Profiles.AddRange(s.Profiles ?? []); ActiveProfile = s.ActiveProfile;
         Loc.Instance.Set(Language);
-        Loc.Instance.Changed += () => OnPropertyChanged(string.Empty); // alle Texte neu lesen
+        Loc.Instance.Changed += () => OnPropertyChanged(string.Empty); // re-read all texts
         _loading = false;
         Apply();
         Selected = TotalRow;
 
         _timer.Tick += (_, _) => Tick();
         _timer.Start();
-        if (_engineEnabled) StartEngine(interactive: false); // letzter Zustand, Standard: an
+        if (_engineEnabled) StartEngine(interactive: false); // last state, default: on
     }
 
     AppRow GetRow(string path, string name, AppRule? rule = null)
@@ -259,7 +259,7 @@ public partial class MainViewModel : ObservableObject
             RuleStore.Save(_file, new Settings(rules, GlobalDownKb * 1024, GlobalUpKb * 1024,
                 Language, StartMinimized, Autostart, _engineEnabled, ShowChart, Profiles, ActiveProfile));
         }
-        catch (System.IO.IOException) { } // Speichern ist nicht kritisch
+        catch (System.IO.IOException) { } // saving is not critical
     }
 
     partial void OnGlobalDownKbChanged(long value) { if (TotalRow.DownLimitKb != value) TotalRow.DownLimitKb = value; Apply(); }
@@ -269,7 +269,7 @@ public partial class MainViewModel : ObservableObject
     partial void OnSearchChanged(string value) => View.Refresh();
     partial void OnSelectedChanged(AppRow? value)
     {
-        if (value == null) { Selected = TotalRow; return; } // Auswahl nie leer: dann Gesamtansicht
+        if (value == null) { Selected = TotalRow; return; } // selection is never empty: fall back to the overview
         OnPropertyChanged(nameof(ChartTitle));
         PublishChart();
     }
@@ -290,7 +290,7 @@ public partial class MainViewModel : ObservableObject
         if (_loading || _syncingAutostart) return;
         if (!Platform.SetAutostart(value))
         {
-            _syncingAutostart = true; Autostart = !value; _syncingAutostart = false; // zurücksetzen
+            _syncingAutostart = true; Autostart = !value; _syncingAutostart = false; // reset
             MessageBox.Show(T("msg_autostart_failed"), "TrafficLimiter");
             return;
         }
@@ -306,7 +306,7 @@ public partial class MainViewModel : ObservableObject
         }
         else
         {
-            _engineEnabled = true;           // Absicht merken, auch wenn der Start (z. B. ohne Admin) scheitert
+            _engineEnabled = true;           // remember the intent even if the start fails (e.g. without admin)
             StartEngine(interactive: true);
         }
         Save();
@@ -325,7 +325,7 @@ public partial class MainViewModel : ObservableObject
             EngineOn = false;
             _noAdmin = e is Win32Exception && !Platform.IsElevated;
             OnPropertyChanged(nameof(Status));
-            if (!interactive) return false;   // beim Programmstart keine Dialoge
+            if (!interactive) return false;   // no dialogs at program start
             if (e is DllNotFoundException) MessageBox.Show(T("msg_dll"), "TrafficLimiter");
             else if (_noAdmin)
             {
@@ -347,7 +347,7 @@ public partial class MainViewModel : ObservableObject
         row.DownLimitKb = 0; row.UpLimitKb = 0; row.Block = false; row.Priority = Priority.Normal;
     }
 
-    /// <summary>Aktuelle Regeln + Gesamtlimits unter einem Namen speichern (gleicher Name überschreibt).</summary>
+    /// <summary>Saves the current rules + overall limits under a name (same name overwrites).</summary>
     public void SaveProfile(string name)
     {
         var p = new Profile(name, Rows.Where(r => !r.IsTotal && !r.IsDefault).Select(r => r.ToRule()).ToList(),
@@ -360,7 +360,7 @@ public partial class MainViewModel : ObservableObject
 
     public void ApplyProfile(Profile p)
     {
-        _loading = true; // Sammelumschaltung: nur ein Engine-Update und ein Speichern am Ende
+        _loading = true; // bulk switch: only one engine update and one save at the end
         try
         {
             foreach (var r in Rows.Where(r => !r.IsTotal))
@@ -412,6 +412,6 @@ public partial class MainViewModel : ObservableObject
         PublishChart();
     }
 
-    /// <summary>Verlauf der gewählten App, sonst des ganzen Rechners.</summary>
+    /// <summary>History of the selected app, otherwise of the whole computer.</summary>
     void PublishChart() => ChartSamples = Selected?.History.ToArray() ?? [];
 }

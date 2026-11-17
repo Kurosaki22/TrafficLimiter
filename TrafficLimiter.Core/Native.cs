@@ -24,7 +24,7 @@ static class WinDivert
     public static extern bool WinDivertClose(IntPtr h);
 }
 
-/// <summary>Prozess-Zuordnung über iphlpapi (bestehende Verbindungen) und Pfadauflösung.</summary>
+/// <summary>Process mapping via iphlpapi (existing connections) and path resolution.</summary>
 static class Win32Info
 {
     [DllImport("iphlpapi.dll")]
@@ -40,10 +40,10 @@ static class Win32Info
 
     public static int Key(byte proto, int port) => proto << 16 | port;
 
-    /// <summary>(proto,lokaler Port) -> PID aller aktuellen TCP/UDP-Sockets.</summary>
+    /// <summary>(proto, local port) -> PID of all current TCP/UDP sockets.</summary>
     public static void ReadTables(IDictionary<int, int> map)
     {
-        // Parameter: TCP?, AF, Zeilengröße, Offset lokaler Port, Offset PID
+        // Parameters: TCP?, AF, row size, local port offset, PID offset
         Read(false, 2, 12, 4, 8, map); Read(false, 23, 28, 20, 24, map);
         Read(true, 2, 24, 8, 20, map); Read(true, 23, 56, 20, 52, map);
     }
@@ -52,7 +52,7 @@ static class Win32Info
     {
         int size = 0;
         Call(tcp, IntPtr.Zero, ref size, af);
-        for (int i = 0; i < 3; i++) // Tabelle kann zwischen den Aufrufen wachsen
+        for (int i = 0; i < 3; i++) // the table can grow between calls
         {
             size += 4096;
             var buf = Marshal.AllocHGlobal(size);
@@ -78,7 +78,7 @@ static class Win32Info
         ? GetExtendedTcpTable(buf, ref size, false, af, 5, 0)
         : GetExtendedUdpTable(buf, ref size, false, af, 1, 0);
 
-    /// <summary>Voller Pfad (PROCESS_QUERY_LIMITED_INFORMATION), null wenn nicht lesbar.</summary>
+    /// <summary>Full path (PROCESS_QUERY_LIMITED_INFORMATION), null if unreadable.</summary>
     public static string? ImagePath(int pid)
     {
         var h = OpenProcess(0x1000, false, pid);

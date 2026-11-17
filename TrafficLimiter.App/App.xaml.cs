@@ -9,14 +9,14 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
-        // Enter in einem Textfeld übernimmt den Wert sofort (statt erst beim Verlassen des Felds)
+        // Enter in a text box commits the value immediately (instead of only on losing focus)
         EventManager.RegisterClassHandler(typeof(System.Windows.Controls.TextBox), System.Windows.UIElement.KeyDownEvent,
             new System.Windows.Input.KeyEventHandler((s, k) =>
             {
                 if (k.Key == System.Windows.Input.Key.Enter && s is System.Windows.Controls.TextBox tb)
                     tb.GetBindingExpression(System.Windows.Controls.TextBox.TextProperty)?.UpdateSource();
             }));
-        ShutdownMode = ShutdownMode.OnExplicitShutdown; // Fenster darf im Tray versteckt bleiben
+        ShutdownMode = ShutdownMode.OnExplicitShutdown; // the window may stay hidden in the tray
         ApplyTheme();
         Microsoft.Win32.SystemEvents.UserPreferenceChanged += (_, _) => Dispatcher.Invoke(ApplyTheme);
 
@@ -25,7 +25,7 @@ public partial class App : Application
         if (!w.StartHidden) w.Show();
     }
 
-    /// <summary>Eigene Farben passend zum Windows-Theme (Hell/Dunkel); das Fluent-Theme folgt dem System selbst.</summary>
+    /// <summary>Own colors matching the Windows theme (light/dark); the Fluent theme follows the system itself.</summary>
     void ApplyTheme()
     {
         bool light = Microsoft.Win32.Registry.GetValue(

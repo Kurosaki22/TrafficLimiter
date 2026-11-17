@@ -8,18 +8,18 @@ namespace TrafficLimiter.Core;
 public record AppSnapshot(string Path, string Name, long DownRate, long UpRate, long TotalDown, long TotalUp);
 
 /// <summary>
-/// Hält Pakete per WinDivert an (NETWORK-Layer), ordnet sie über FLOW-Events + iphlpapi einem Prozess zu,
-/// zählt Traffic und wendet Block/Limit an. Pakete ohne bekannte Zuordnung werden unverändert durchgelassen.
+/// Intercepts packets via WinDivert (NETWORK layer), maps them to a process via FLOW events + iphlpapi,
+/// counts traffic and applies block/limit. Packets without a known mapping pass through unchanged.
 /// </summary>
 public sealed class PacketEngine : IDisposable
 {
     sealed class Stats { public long Down, Up, LastDown, LastUp; public string Name = ""; }
     sealed class Delayed { public byte[] Data = []; public uint Len; public byte[] Addr = []; }
 
-    const double MaxDelaySeconds = 1.0;     // länger warten = droppen (TCP/QUIC bremst dann selbst)
+    const double MaxDelaySeconds = 1.0;     // waiting longer = drop (TCP/QUIC then slows down on its own)
     const long MaxQueuedBytes = 16 << 20;
 
-    readonly ConcurrentDictionary<int, int> _flows = new();                       // proto<<16|lokaler Port -> PID
+    readonly ConcurrentDictionary<int, int> _flows = new();                       // proto<<16|local port -> PID
     readonly ConcurrentDictionary<int, (string Path, string Name)> _procs = new();
     readonly ConcurrentDictionary<string, Stats> _stats = new(StringComparer.OrdinalIgnoreCase);
     readonly ConcurrentDictionary<(string, bool), TokenBucket> _buckets = new();
@@ -35,7 +35,7 @@ public sealed class PacketEngine : IDisposable
 
     public bool Running => _running;
     public bool Paused { get; set; }
-    public long GlobalDownLimit { get; set; }   // Bytes/s, 0 = aus
+    public long GlobalDownLimit { get; set; }   // bytes/s, 0 = off
     public long GlobalUpLimit { get; set; }
 
     double Now => _clock.Elapsed.TotalSeconds;
@@ -47,7 +47,7 @@ public sealed class PacketEngine : IDisposable
     {
         if (_running) return;
         _flow = WinDivert.WinDivertOpen("true", WinDivert.LayerFlow, 0, WinDivert.FlagSniff | WinDivert.FlagRecvOnly);
-        if (_flow == -1) throw new Win32Exception(); // meist: nicht als Admin gestartet
+        if (_flow == -1) throw new Win32Exception(); // usually: not started as admin
         ReadTables();
         _net = WinDivert.WinDivertOpen("!loopback and (tcp or udp)", WinDivert.LayerNetwork, 0, 0);
         if (_net == -1) { var e = new Win32Exception(); WinDivert.WinDivertClose(_flow); throw e; }
@@ -71,7 +71,7 @@ public sealed class PacketEngine : IDisposable
 
     public void Dispose() => Stop();
 
-    /// <summary>Aktuelle Raten (seit letztem Aufruf) und Summen pro Anwendung.</summary>
+    /// <summary>Current rates (since the last call) and totals per application.</summary>
     public List<AppSnapshot> Snapshot()
     {
         long t = Stopwatch.GetTimestamp();
@@ -104,8 +104,8 @@ public sealed class PacketEngine : IDisposable
             int port = BinaryPrimitives.ReadUInt16LittleEndian(addr.AsSpan(68));
             int pid = (int)BinaryPrimitives.ReadUInt32LittleEndian(addr.AsSpan(32));
             int key = Win32Info.Key(proto, port);
-            // shortcut: Schlüssel ohne lokale Adresse, Kollision nur bei gleichem Port auf mehreren lokalen IPs
-            if (ev == 1) { _flows[key] = pid; _procs.TryRemove(pid, out _); }  // ESTABLISHED (Pfad neu auflösen)
+            // shortcut: key has no local address, collides only for the same port on several local IPs
+            if (ev == 1) { _flows[key] = pid; _procs.TryRemove(pid, out _); }  // ESTABLISHED (re-resolve the path)
             else if (ev == 2) _flows.TryRemove(new KeyValuePair<int, int>(key, pid)); // DELETED
         }
     }
@@ -124,7 +124,7 @@ public sealed class PacketEngine : IDisposable
     {
         int key = Win32Info.Key(proto, port);
         if (_flows.TryGetValue(key, out pid)) return true;
-        // Verbindung vor Engine-Start/ohne Event: Tabelle neu lesen, höchstens alle 2 s
+        // connection from before engine start/without event: re-read the table, at most every 2 s
         if (Environment.TickCount64 - _lastTableRead > 2000) ReadTables();
         return _flows.TryGetValue(key, out pid);
     }
@@ -150,14 +150,14 @@ public sealed class PacketEngine : IDisposable
         }
     }
 
-    /// <summary>Zählt das Paket und liefert die nötige Wartezeit; drop=true: verwerfen.</summary>
+    /// <summary>Counts the packet and returns the required delay; drop=true: discard.</summary>
     double Handle(byte[] p, int len, byte[] addr, out bool drop)
     {
         drop = false;
-        bool outbound = (addr[10] & 2) != 0; // Outbound-Bit
+        bool outbound = (addr[10] & 2) != 0; // outbound bit
         int ihl, proto;
         if (len >= 20 && p[0] >> 4 == 4) { ihl = (p[0] & 15) * 4; proto = p[9]; }
-        else if (len >= 40 && p[0] >> 4 == 6) { ihl = 40; proto = p[6]; } // shortcut: IPv6-Extension-Header -> durchlassen
+        else if (len >= 40 && p[0] >> 4 == 6) { ihl = 40; proto = p[6]; } // shortcut: IPv6 extension headers -> pass through
         else return 0;
         if ((proto != 6 && proto != 17) || len < ihl + 4) return 0;
         int src = p[ihl] << 8 | p[ihl + 1], dst = p[ihl + 2] << 8 | p[ihl + 3];
@@ -184,7 +184,7 @@ public sealed class PacketEngine : IDisposable
         {
             var g = outbound ? _globalUp : _globalDown;
             if ((long)g.Rate != cap) g.SetRate(cap, now);
-            // Priorität: höhere Stufen dürfen mehr vom Bucket verbrauchen, niedrigere warten zuerst
+            // Priority: higher levels may use more of the bucket, lower ones wait first
             double reserve = (rule?.Priority ?? Priority.Normal) switch
             { Priority.Critical => 0, Priority.High => 0.1, Priority.Normal => 0.25, _ => 0.5 };
             delay = Math.Max(delay, g.Delay(len, now, reserve));

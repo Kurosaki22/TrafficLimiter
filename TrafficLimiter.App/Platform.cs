@@ -13,9 +13,9 @@ static class Platform
     const string TaskName = "TrafficLimiter";
 
     /// <summary>
-    /// Autostart als Aufgabe mit höchsten Rechten (startet beim Anmelden ohne UAC-Abfrage).
-    /// Das Anlegen braucht einmalig eine Administrator-Bestätigung. Liefert false, wenn sie abgelehnt wurde/fehlschlug.
-    /// shortcut: Pfad der aktuellen EXE wird fest eingetragen, nach Verschieben der EXE Option aus-/einschalten.
+    /// Autostart as a task with highest privileges (starts at logon without a UAC prompt).
+    /// Creating it needs a one-time administrator confirmation. Returns false if it was declined/failed.
+    /// shortcut: the current EXE path is stored as-is, toggle the option off/on after moving the EXE.
     /// </summary>
     public static bool SetAutostart(bool enable)
     {
@@ -41,6 +41,6 @@ if (Get-ScheduledTask -TaskName {TaskName} -ErrorAction SilentlyContinue) {{ Unr
             p.WaitForExit();
             return p.ExitCode == 0;
         }
-        catch (Win32Exception) { return false; } // UAC abgelehnt
+        catch (Win32Exception) { return false; } // UAC declined
     }
 }
